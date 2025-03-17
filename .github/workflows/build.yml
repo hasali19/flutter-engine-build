@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -34,8 +37,46 @@ jobs:
           cp out/host_release/flutter_engine.dll      dist/
           cp out/host_release/flutter_engine.dll.lib  dist/
 
+          git rev-parse HEAD > dist/commit
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-x64-embedder
+          name: windows-x64-embedder-release
           path: flutter/engine/src/dist/*
+
+  release:
+    runs-on: ubuntu-20.04
+    needs: build
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v4
+
+      - name: Setup git
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create git tag
+        id: create-git-tag
+        run: |
+          commit="$(cat windows-x64-embedder-release/commit)"
+          tag="build-$commit"
+          git tag $tag
+          git push origin $tag
+          echo "::set-output name=TAG::$tag"
+          echo "::set-output name=COMMIT::$commit"
+
+      - name: Prepare artifacts
+        run: |
+          ls -R
+          tar -czvf windows-x64-embedder-release.tar.gz windows-x64-embedder-release/*
+
+      - name: Create release
+        run: |
+          gh release create ${{ steps.create-git-tag.outputs.TAG }} windows-x64-embedder-release.tar.gz \
+            -n "flutter/flutter@${{ steps.create-git-tag.outputs.COMMIT }}"
