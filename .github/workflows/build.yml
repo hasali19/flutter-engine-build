@@ -29,13 +29,13 @@ jobs:
           $env:PATH="$(pwd)\flutter\bin;$env:PATH"
           et build --config host_release //flutter/shell/platform/embedder:flutter_engine
 
-          mkdir dist/windows-x64-embedder
-          cp out/host_release/flutter_embedder.h      dist/windows-x64-embedder/
-          cp out/host_release/flutter_engine.dll      dist/windows-x64-embedder/
-          cp out/host_release/flutter_engine.dll.lib  dist/windows-x64-embedder/
+          mkdir dist
+          cp out/host_release/flutter_embedder.h      dist/
+          cp out/host_release/flutter_engine.dll      dist/
+          cp out/host_release/flutter_engine.dll.lib  dist/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-x64-embedder
-          path: dist/windows-x64-embedder/*
+          path: flutter/engine/src/dist/*
