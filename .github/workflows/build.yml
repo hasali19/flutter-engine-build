@@ -18,6 +18,8 @@ jobs:
         run: |
           $env:PATH="$HOME\depot_tools;$env:PATH"
 
+          git config --system core.longpaths true
+
           git clone https://github.com/flutter/flutter.git
           cd flutter
           cp engine/scripts/standard.gclient .gclient
