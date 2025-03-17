@@ -1,0 +1,27 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Install depot_tools
+        run: |
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME\depot_tools"
+
+      - name: Build flutter
+        env:
+          DEPOT_TOOLS_WIN_TOOLCHAIN: "0"
+        run: |
+          $env:PATH="$HOME\depot_tools;$env:PATH"
+
+          git clone https://github.com/flutter/flutter.git
+          cd flutter
+          cp engine/scripts/standard.gclient .gclient
+          gclient sync
+
+          $env:PATH="$(pwd)\engine\src\flutter\bin;$env:PATH"
+          et build --config host_release //flutter/shell/platform/embedder:flutter_engine
