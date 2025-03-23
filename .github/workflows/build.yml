@@ -2,7 +2,11 @@ name: Build
 
 on:
   workflow_dispatch:
-  push:
+    inputs:
+      revision:
+        description: 'Revision'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -25,6 +29,7 @@ jobs:
 
           git clone https://github.com/flutter/flutter.git
           cd flutter
+          git checkout '${{ inputs.revision }}'
           cp engine/scripts/standard.gclient .gclient
           gclient sync
 
@@ -74,7 +79,7 @@ jobs:
       - name: Prepare artifacts
         run: |
           ls -R
-          tar -czvf windows-x64-embedder-release.tar.gz windows-x64-embedder-release/*
+          zip -r windows-x64-embedder-release.zip windows-x64-embedder-release
 
       - name: Create release
         env:
