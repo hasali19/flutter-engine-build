@@ -86,5 +86,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create ${{ steps.create-git-tag.outputs.TAG }} windows-x64-embedder-release.tar.gz \
+          gh release create ${{ steps.create-git-tag.outputs.TAG }} windows-x64-embedder-release.zip \
             -n "flutter/flutter@${{ steps.create-git-tag.outputs.COMMIT }}"
