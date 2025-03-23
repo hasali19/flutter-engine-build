@@ -79,7 +79,8 @@ jobs:
       - name: Prepare artifacts
         run: |
           ls -R
-          zip -r windows-x64-embedder-release.zip windows-x64-embedder-release
+          cd windows-x64-embedder-release
+          zip -r ../windows-x64-embedder-release.zip *
 
       - name: Create release
         env:
