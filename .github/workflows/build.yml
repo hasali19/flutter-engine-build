@@ -41,6 +41,7 @@ jobs:
           cp out/host_release/flutter_embedder.h      dist/
           cp out/host_release/flutter_engine.dll      dist/
           cp out/host_release/flutter_engine.dll.lib  dist/
+          cp out/host_release/gen_snapshot.exe        dist/
 
           git rev-parse HEAD > dist/commit
 
