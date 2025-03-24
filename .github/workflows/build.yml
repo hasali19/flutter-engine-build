@@ -35,6 +35,7 @@ jobs:
 
           cd engine/src
           $env:PATH="$(pwd)\flutter\bin;$env:PATH"
+          et build --config host_release //flutter/lib/snapshot:generate_snapshot_bin
           et build --config host_release //flutter/shell/platform/embedder:flutter_engine
 
           mkdir dist
