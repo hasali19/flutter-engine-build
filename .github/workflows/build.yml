@@ -75,8 +75,8 @@ jobs:
           tag="build-$commit"
           git tag $tag
           git push origin $tag
-          echo "::set-output name=TAG::$tag"
-          echo "::set-output name=COMMIT::$commit"
+          echo "TAG=$tag" >> $env:GITHUB_OUTPUT
+          echo "COMMIT=$commit" >> $env:GITHUB_OUTPUT
 
       - name: Prepare artifacts
         run: |
