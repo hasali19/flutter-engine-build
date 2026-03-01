@@ -19,7 +19,7 @@ jobs:
         with:
           sdk-version: 22621
 
-      - run: ls 'C:\Program Files (x86)\Windows Kits\10\include'
+      - run: ls 'C:\Program Files (x86)\Windows Kits\10\include\10.0.22621.0'
 
       - uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
