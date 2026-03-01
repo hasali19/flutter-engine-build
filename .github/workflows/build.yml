@@ -15,9 +15,14 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
+      # - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
+      #   with:
+      #     sdk-version: 22621
+
+      - uses: ChristopheLav/windows-sdk-install@v1
         with:
-          sdk-version: 22621
+          version-sdk: 22621
+          features: 'OptionId.DesktopCPPx64'
 
       - run: ls 'C:\Program Files (x86)\Windows Kits\10\include\10.0.22621.0'
 
