@@ -15,6 +15,10 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
+        with:
+          sdk-version: 22621
+
       - name: Install depot_tools
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME\depot_tools"
