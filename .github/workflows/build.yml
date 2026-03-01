@@ -19,6 +19,11 @@ jobs:
         with:
           sdk-version: 22621
 
+      - uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64
+          sdk: '10.0.22621.0'
+
       - name: Install depot_tools
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME\depot_tools"
