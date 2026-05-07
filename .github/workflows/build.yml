@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     steps:
       # - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
@@ -70,9 +70,49 @@ jobs:
           name: windows-x64-embedder-release
           path: flutter/engine/src/dist/*
 
+  build-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME/depot_tools"
+
+      - name: Build flutter
+        env:
+          DEPOT_TOOLS_WIN_TOOLCHAIN: "0"
+        run: |
+          export PATH="$HOME/depot_tools:$PATH"
+
+          git clone https://github.com/flutter/flutter.git
+          cd flutter
+          git checkout '${{ inputs.revision }}'
+          cp engine/scripts/standard.gclient .gclient
+          gclient sync
+
+          cd engine/src
+          export PATH="$(pwd)/flutter/bin:$PATH"
+          #mkdir out
+          #mkdir out\host_release
+          et build --config host_release //flutter/lib/snapshot:generate_snapshot_bin
+          et build --config host_release //flutter/shell/platform/embedder:flutter_engine
+
+          mkdir dist
+          cp out/host_release/flutter_embedder.h      dist/
+          cp out/host_release/flutter_engine.dll      dist/
+          cp out/host_release/flutter_engine.dll.lib  dist/
+          cp out/host_release/gen_snapshot.exe        dist/
+
+          git rev-parse HEAD > dist/commit
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64-embedder-release
+          path: flutter/engine/src/dist/*
+
   release:
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - build-windows
+      - build-linux
     if: success() && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout git repo
@@ -101,10 +141,12 @@ jobs:
           ls -R
           cd windows-x64-embedder-release
           zip -r ../windows-x64-embedder-release.zip *
+          cd ../linux-x64-embedder-release
+          zip -r ../linux-x64-embedder-release.zip *
 
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create ${{ steps.create-git-tag.outputs.TAG }} windows-x64-embedder-release.zip \
+          gh release create ${{ steps.create-git-tag.outputs.TAG }} windows-x64-embedder-release.zip linux-x64-embedder-release \
             -n "flutter/flutter@${{ steps.create-git-tag.outputs.COMMIT }}"
