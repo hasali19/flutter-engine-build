@@ -59,9 +59,10 @@ jobs:
           ls out/host_release
 
           mkdir dist
-          cp out/host_release/flutter_embedder.h dist/
-          cp out/host_release/flutter_engine.so  dist/
-          cp out/host_release/gen_snapshot       dist/
+          cp out/host_release/flutter_embedder.h      dist/
+          cp out/host_release/flutter_engine.dll      dist/
+          cp out/host_release/flutter_engine.dll.lib  dist/
+          cp out/host_release/gen_snapshot.exe        dist/
 
           git rev-parse HEAD > dist/commit
 
@@ -96,10 +97,9 @@ jobs:
           et build --config host_release //flutter/shell/platform/embedder:flutter_engine
 
           mkdir dist
-          cp out/host_release/flutter_embedder.h      dist/
-          cp out/host_release/flutter_engine.dll      dist/
-          cp out/host_release/flutter_engine.dll.lib  dist/
-          cp out/host_release/gen_snapshot.exe        dist/
+          cp out/host_release/flutter_embedder.h dist/
+          cp out/host_release/flutter_engine.so  dist/
+          cp out/host_release/gen_snapshot       dist/
 
           git rev-parse HEAD > dist/commit
 
