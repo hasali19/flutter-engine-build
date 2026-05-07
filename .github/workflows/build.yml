@@ -56,11 +56,12 @@ jobs:
           et build --config host_release //flutter/lib/snapshot:generate_snapshot_bin
           et build --config host_release //flutter/shell/platform/embedder:flutter_engine
 
+          ls out/host_release
+
           mkdir dist
-          cp out/host_release/flutter_embedder.h      dist/
-          cp out/host_release/flutter_engine.dll      dist/
-          cp out/host_release/flutter_engine.dll.lib  dist/
-          cp out/host_release/gen_snapshot.exe        dist/
+          cp out/host_release/flutter_embedder.h dist/
+          cp out/host_release/flutter_engine.so  dist/
+          cp out/host_release/gen_snapshot       dist/
 
           git rev-parse HEAD > dist/commit
 
