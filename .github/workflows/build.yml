@@ -49,6 +49,11 @@ jobs:
           cp engine/scripts/standard.gclient .gclient
           gclient sync
 
+          # tools/gn sets dart_use_fallback_root_certificates on Windows, but the Dart SDK no longer
+          # declares it. GN then prints a warning ahead of `gn desc` JSON output, which breaks `et build`.
+          $gn = 'engine/src/flutter/tools/gn'
+          (Get-Content $gn) -replace "gn_args\['dart_use_fallback_root_certificates'\] = True", 'pass' | Set-Content $gn
+
           cd engine/src
           $env:PATH="$(pwd)\flutter\bin;$env:PATH"
           #mkdir out
