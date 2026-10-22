@@ -49,6 +49,9 @@ jobs:
           cp engine/scripts/standard.gclient .gclient
           gclient sync
 
+          # dart_use_fallback_root_certificates causes gn to print a warning when running `gn desc`, which breaks `et build`.
+          (Get-Content 'engine/src/flutter/tools/gn') -replace "gn_args\['dart_use_fallback_root_certificates'\] = True", 'pass' | Set-Content 'engine/src/flutter/tools/gn'
+
           cd engine/src
           $env:PATH="$(pwd)\flutter\bin;$env:PATH"
           #mkdir out
