@@ -103,7 +103,7 @@ jobs:
           path: flutter/engine/src/dist/*
 
   build-linux:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: resolve
     steps:
       - run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME/depot_tools"
