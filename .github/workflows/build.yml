@@ -1,19 +1,46 @@
 name: Build
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
-    inputs:
-      revision:
-        description: 'Revision'
-        required: false
-        type: string
 
 permissions:
   contents: write
 
 jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      engine: ${{ steps.resolve.outputs.ENGINE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve engine commit
+        id: resolve
+        run: |
+          version="$(sed -n 's/^flutter_version: *//p' config.yaml | tr -d '[:space:]')"
+          releases="$(curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json)"
+          hash="$(jq -r --arg v "$version" '.releases[] | select(.version == $v and .channel == "stable") | .hash' <<< "$releases" | head -n1)"
+
+          if [ -z "$hash" ]; then
+            echo "Flutter stable version '$version' not found"
+            exit 1
+          fi
+
+          engine="$(curl -fsSL "https://raw.githubusercontent.com/flutter/flutter/$hash/bin/internal/engine.version" | tr -d '[:space:]')"
+          if [[ ! "$engine" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Unexpected engine version: '$engine'"
+            exit 1
+          fi
+
+          echo "Flutter $version: framework $hash, engine $engine"
+          echo "ENGINE=$engine" >> "$GITHUB_OUTPUT"
+
   build-windows:
     runs-on: windows-latest
+    needs: resolve
     steps:
       # - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
       #   with:
@@ -45,7 +72,7 @@ jobs:
 
           git clone https://github.com/flutter/flutter.git
           cd flutter
-          git checkout '${{ inputs.revision }}'
+          git checkout '${{ needs.resolve.outputs.engine }}'
           cp engine/scripts/standard.gclient .gclient
           gclient sync
 
@@ -77,6 +104,7 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-24.04
+    needs: resolve
     steps:
       - run: git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME/depot_tools"
 
@@ -88,7 +116,7 @@ jobs:
 
           git clone https://github.com/flutter/flutter.git
           cd flutter
-          git checkout '${{ inputs.revision }}'
+          git checkout '${{ needs.resolve.outputs.engine }}'
           cp engine/scripts/standard.gclient .gclient
           gclient sync
 
@@ -137,8 +165,8 @@ jobs:
         run: |
           commit="$(cat windows-x64-embedder-release/commit)"
           tag="build-$commit"
-          git tag $tag
-          git push origin $tag
+          git tag -f $tag
+          git push -f origin $tag
           echo "TAG=$tag" >> $GITHUB_OUTPUT
           echo "COMMIT=$commit" >> $GITHUB_OUTPUT
 
@@ -153,6 +181,12 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.create-git-tag.outputs.TAG }}
+          COMMIT: ${{ steps.create-git-tag.outputs.COMMIT }}
         run: |
-          gh release create ${{ steps.create-git-tag.outputs.TAG }} windows-x64-embedder-release.zip linux-x64-embedder-release.zip \
-            -n "flutter/flutter@${{ steps.create-git-tag.outputs.COMMIT }}"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" windows-x64-embedder-release.zip linux-x64-embedder-release.zip --clobber
+          else
+            gh release create "$TAG" windows-x64-embedder-release.zip linux-x64-embedder-release.zip \
+              -n "flutter/flutter@$COMMIT"
+          fi
