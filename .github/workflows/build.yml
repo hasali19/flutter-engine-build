@@ -15,7 +15,7 @@ jobs:
     outputs:
       engine: ${{ steps.resolve.outputs.ENGINE }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Resolve engine commit
         id: resolve
@@ -150,7 +150,7 @@ jobs:
     if: success() && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup git
         run: |
